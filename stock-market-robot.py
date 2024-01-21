@@ -650,7 +650,7 @@ def place_trailing_stop_sell_order(symbol, qty, current_price):
             side='sell',
             type='trailing_stop',
             trail_percent=stop_loss_percent,
-            time_in_force='gtc'
+            time_in_force='gtc'    # 'gtc' or 'day'
         )
 
         print(f"Placed trailing stop sell order for {qty} shares of {symbol} at {stop_loss_price}")
