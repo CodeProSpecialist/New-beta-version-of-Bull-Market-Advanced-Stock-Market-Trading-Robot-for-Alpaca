@@ -374,7 +374,7 @@ def end_time_reached():
 
 def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
     stocks_to_remove = []
-    global start_time, end_time, original_start_time, price_changes, symbol   # Access the global end_time variable
+    global start_time, end_time, original_start_time, price_changes, symbol  # Access the global end_time variable
 
     extracted_date_from_today_date = datetime.today().date()
     today_date_str = extracted_date_from_today_date.strftime("%Y-%m-%d")
@@ -395,7 +395,7 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
 
     # Check if the current time is before the start trading time
     if datetime.now(pytz.timezone('US/Eastern')) < start_trading_time:
-        return    # Exit the function if the current time is before 10:35 Eastern Time
+        return  # Exit the function if the current time is before 10:35 Eastern Time
 
     # Define the start_time variable
     start_time = time.time()
@@ -404,7 +404,7 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
     original_start_time = start_time
 
     # below is the debugging end_time of 60 seconds to look for errors.
-    #end_time = start_time + 60  # 60 seconds
+    # end_time = start_time + 60  # 60 seconds
 
     # Calculate the end_time based on the start_time
     # we need to select a time out of the 6.5 hour stock market trading day
@@ -412,7 +412,7 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
     # The most successful settings are to buy if price increases 3 times within 3 minutes
     # when using MACD, RSI, and VOLUME conditions to buy stocks at the correct times.
     # ( buying stocks after 9:30am Eastern time )
-    end_time = start_time + 3 * 60   # 3 minutes multiplied by 60 seconds per minute
+    end_time = start_time + 3 * 60  # 3 minutes multiplied by 60 seconds per minute
 
     # Define the target time as 15:56 Eastern Time ( to stop the buy_stocks function )
     target_time = datetime.now(pytz.timezone('US/Eastern')).replace(hour=15, minute=56, second=0, microsecond=0)
@@ -472,7 +472,7 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
 
                 # I might not need the extra sleep command below
                 # keep the below time.sleep(1) below the s in "for symbol"
-                time.sleep(2)   # wait 1.7 to 3 seconds to not move too fast for the stock price data rate limit.
+                time.sleep(2)  # wait 1.7 to 3 seconds to not move too fast for the stock price data rate limit.
 
         # Print overall total price increases and decreases after reaching end_time_reached()
         if end_time_reached():
@@ -531,10 +531,12 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
 
                 # Add conditions based on your chosen values for MACD, RSI, and Volume
                 # Add conditions based on your specified values for MACD, RSI, and Volume
-                favorable_macd_condition = (historical_data['signal'].iloc[-1] > 0.15)  # MACD signal is greater than 0.15
+                favorable_macd_condition = (
+                            historical_data['signal'].iloc[-1] > 0.15)  # MACD signal is greater than 0.15
                 favorable_rsi_condition = (historical_data['rsi'].iloc[-1] > 70)  # RSI is greater than 70
                 # Favorable volume is greater than 15% less than the mean or more volume than 85% average volume.
-                favorable_volume_condition = (historical_data['volume'].iloc[-1] > 0.85 * historical_data['volume'].mean())
+                favorable_volume_condition = (
+                            historical_data['volume'].iloc[-1] > 0.85 * historical_data['volume'].mean())
 
                 # THE BELOW PYTHON CODE WILL PURCHASE STOCKS
                 # AND IT WORKS CORRECTLY WHEN THE PRICE INCREASES ENOUGH TIMES.
@@ -569,8 +571,8 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
                         # this append tuple will provide the date=date and the purchase_date = date
                         # in the correct datetime format for the database. This is the date
                         # in the below "with buy_sell_lock:" code block.
-                        time.sleep(120)    # wait 120 seconds for buy order to process. 
-                        
+                        time.sleep(120)  # wait 120 seconds for buy order to process.
+
                         stop_order_id = place_trailing_stop_sell_order(symbol, qty_of_one_stock, current_price)
                         if stop_order_id:
                             print(f"Trailing stop sell order placed for {symbol} with ID: {stop_order_id}")
@@ -586,18 +588,19 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
                     # keep the below else under the "if" that is above the else
                 else:
                     print("")
-                    print("\nNot buying stocks based on the technical indicators: MACD, RSI, VOLUME, or based on price decreases. ")
+                    print(
+                        "\nNot buying stocks based on the technical indicators: MACD, RSI, VOLUME, or based on price decreases. ")
                     print("")
                     print_technical_indicators(symbol, calculate_technical_indicators(symbol))
                     print("")
 
-                time.sleep(2)    # keep this under the "if" in "if cash available"
+                time.sleep(2)  # keep this under the "if" in "if cash available"
 
             # I might not need the extra sleep command below
             # keep the below time.sleep(1) below the f in "for symbol"
-            time.sleep(2)    # wait 1.7 to 3 seconds to not move too fast for the stock price data rate limit.
+            time.sleep(2)  # wait 1.7 to 3 seconds to not move too fast for the stock price data rate limit.
 
-        time.sleep(2)    # keep this under the i in "if end_time_reached". this stops after checking each stock price
+        time.sleep(2)  # keep this under the i in "if end_time_reached". this stops after checking each stock price
 
     except Exception as e:  # keep this under the t in "try:"
         # Handle the exception (e.g., log the error)
@@ -638,7 +641,7 @@ def refresh_after_buy():
 # Function to place trailing stop sell order
 def place_trailing_stop_sell_order(symbol, qty, current_price):
     try:
-        stop_loss_percent = 1.0   # You can adjust this percentage based on your strategy
+        stop_loss_percent = 1.0  # You can adjust this percentage based on your strategy
         stop_loss_price = current_price * (1 - stop_loss_percent / 100)
 
         stop_order = api.submit_order(
@@ -721,15 +724,6 @@ def sell_stocks(bought_stocks, buy_sell_lock):
         today_date_str = extracted_date_from_today_date.strftime("%Y-%m-%d")
         bought_date_str = purchase_date  # already string data format
 
-        # Check if there are existing sell orders for the current position
-        existing_sell_orders = api.list_orders(symbol, side='sell', status='open')
-        qty = api.get_position(symbol).qty
-        if not existing_sell_orders:
-            # No existing sell orders, proceed with placing trailing stop sell order
-            stop_order_id = place_trailing_stop_sell_order(symbol, qty, current_price)
-            if stop_order_id:
-                print(f"Trailing stop sell order placed for {symbol} with ID: {stop_order_id}")
-
         # the rest of the code goes by purchase_date instead of bought_date
 
         # print("today_date_str = ", symbol, today_date_str)  # uncomment to print variable date to debug as same date
@@ -746,7 +740,7 @@ def sell_stocks(bought_stocks, buy_sell_lock):
 
             # Never calculate ATR for a buy price or sell price because it is too slow. 1 second per stock.
             # Sell stocks if the current price is more than 0.1% higher than the purchase price.
-            if current_price >= bought_price * 1.001:    # keep this under the "o" in "bought"
+            if current_price >= bought_price * 1.001:  # keep this under the "o" in "bought"
                 qty = api.get_position(symbol).qty
                 api.submit_order(symbol=symbol, qty=qty, side='sell', type='market', time_in_force='day')
                 print(
@@ -808,9 +802,9 @@ def main():
     bought_stocks = load_positions_from_database()
     buy_sell_lock = threading.Lock()
 
-    while True:    # keep this under the m in main
+    while True:  # keep this under the m in main
         try:
-            stop_if_stock_market_is_closed()  # comment this line to debug the Python code
+            #stop_if_stock_market_is_closed()  # comment this line to debug the Python code
             now = datetime.now(pytz.timezone('US/Eastern'))
             current_time_str = now.strftime("Eastern Time | %I:%M:%S %p | %m-%d-%Y |")
 
