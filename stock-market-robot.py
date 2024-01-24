@@ -630,13 +630,13 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
             # Check day trade count
             day_trade_count = account_info.daytrade_count
             # keep the if day_trade_count below the "q" in qty_of_one_stock
-                if day_trade_count < 3:
-                    stop_order_id = place_trailing_stop_sell_order(symbol, qty_of_one_stock, current_price)
-                    # keep the below "if" below the "a" in day_trade_count
-                    if stop_order_id:
-                        print(f"Trailing stop sell order placed for {symbol} with ID: {stop_order_id}")
-                    else:
-                        print(f"Failed to place trailing stop sell order for {symbol}")
+            if day_trade_count < 3:
+                stop_order_id = place_trailing_stop_sell_order(symbol, qty_of_one_stock, current_price)
+                # keep the below "if" below the "a" in day_trade_count
+                if stop_order_id:
+                    print(f"Trailing stop sell order placed for {symbol} with ID: {stop_order_id}")
+                else:
+                    print(f"Failed to place trailing stop sell order for {symbol}")
     
     except SQLAlchemyError as e:  # keep this under the t in "try"
         session.rollback()  # Roll back the transaction on error
