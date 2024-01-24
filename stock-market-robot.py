@@ -622,21 +622,27 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
             session.commit()
             refresh_after_buy()
 
-            time.sleep(120)  # wait 120 seconds for buy order to process.
-
             # Get account information
-            account_info = api.get_account()    # keep this below time.sleep
+            account_info = api.get_account()  # keep this below time.sleep
 
             # Check day trade count
             day_trade_count = account_info.daytrade_count
+
             # keep the if day_trade_count below the "q" in qty_of_one_stock
             if day_trade_count < 3:
+                print("")
+                print("Waiting 2 minutes before placing a trailing stop sell order.....")
+                print("")
+                time.sleep(120)  # wait 120 seconds for buy order to process.
+
                 stop_order_id = place_trailing_stop_sell_order(symbol, qty_of_one_stock, current_price)
                 # keep the below "if" below the "a" in day_trade_count
                 if stop_order_id:
                     print(f"Trailing stop sell order placed for {symbol} with ID: {stop_order_id}")
+                    print("")
                 else:
                     print(f"Failed to place trailing stop sell order for {symbol}")
+                    print("")
     
     except SQLAlchemyError as e:  # keep this under the t in "try"
         session.rollback()  # Roll back the transaction on error
