@@ -664,6 +664,23 @@ def place_trailing_stop_sell_order(symbol, qty, current_price):
         )
 
         print(f"Placed trailing stop sell order for {qty} shares of {symbol} at {stop_loss_price}")
+
+        # Check if the symbol exists in bought_stocks before deleting
+        with buy_sell_lock:
+            if symbol in bought_stocks:
+                del bought_stocks[symbol]
+
+                # Delete the position from the database
+                db_position = session.query(Position).filter_by(symbol=symbol).first()
+
+                # Check if the position exists before attempting to delete
+                if db_position:
+                    # Delete the position
+                    session.delete(db_position)
+
+                    # Commit the changes
+                    session.commit()
+
         return stop_order.id
 
     except Exception as e:
