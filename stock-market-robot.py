@@ -374,7 +374,9 @@ def end_time_reached():
 
 def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
     stocks_to_remove = []
-    global start_time, end_time, original_start_time, price_changes, symbol  # Access the global end_time variable
+    global start_time, end_time, original_start_time, price_changes, symbol, buy_stock_green_light
+
+    buy_stock_green_light = 0  # Initialize the global variable
 
     extracted_date_from_today_date = datetime.today().date()
     today_date_str = extracted_date_from_today_date.strftime("%Y-%m-%d")
@@ -534,11 +536,11 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
                 # Add conditions based on your chosen values for MACD, RSI, and Volume
                 # Add conditions based on your specified values for MACD, RSI, and Volume
                 favorable_macd_condition = (
-                            historical_data['signal'].iloc[-1] > 0.15)  # MACD signal is greater than 0.15
+                        historical_data['signal'].iloc[-1] > 0.15)  # MACD signal is greater than 0.15
                 favorable_rsi_condition = (historical_data['rsi'].iloc[-1] > 70)  # RSI is greater than 70
                 # Favorable volume is greater than 15% less than the mean or more volume than 85% average volume.
                 favorable_volume_condition = (
-                            historical_data['volume'].iloc[-1] > 0.85 * historical_data['volume'].mean())
+                        historical_data['volume'].iloc[-1] > 0.85 * historical_data['volume'].mean())
 
                 # THE BELOW PYTHON CODE WILL PURCHASE STOCKS
                 # AND IT WORKS CORRECTLY WHEN THE PRICE INCREASES ENOUGH TIMES.
@@ -573,13 +575,15 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
                         # this append tuple will provide the date=date and the purchase_date = date
                         # in the correct datetime format for the database. This is the date
                         # in the below "with buy_sell_lock:" code block.
-                        
+                        buy_stock_green_light = 1    # Set the variable to 1 in the buy condition
+
                     # the below else needs to be under the "I" in if qty_of_one_stock
                     else:
                         print("")
                         print("Price increases are favorable to buy stocks. Quantity of One Stock is 0. Not buying "
                               "stocks right now. Perhaps we need more cash before buying. ")
                         print("")
+                        buy_stock_green_light = 0    # Set the variable to 0 in the not buying condition
                     # keep the below else under the "if" that is above the else
                 else:
                     print("")
@@ -629,7 +633,7 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
             day_trade_count = account_info.daytrade_count
 
             # keep the if day_trade_count below the "q" in qty_of_one_stock
-            if day_trade_count < 3:
+            if buy_stock_green_light == 1 and day_trade_count < 3:
                 print("")
                 print("Waiting 2 minutes before placing a trailing stop sell order.....")
                 print("")
@@ -643,7 +647,7 @@ def buy_stocks(bought_stocks, stocks_to_buy, buy_sell_lock):
                 else:
                     print(f"Failed to place trailing stop sell order for {symbol}")
                     print("")
-    
+
     except SQLAlchemyError as e:  # keep this under the t in "try"
         session.rollback()  # Roll back the transaction on error
         # Handle the error or log it
@@ -668,7 +672,7 @@ def place_trailing_stop_sell_order(symbol, qty_of_one_stock, current_price):
             side='sell',
             type='trailing_stop',
             trail_percent=stop_loss_percent,
-            time_in_force='gtc'    # 'gtc' or 'day'
+            time_in_force='gtc'  # 'gtc' or 'day'
         )
 
         print(f"Placed trailing stop sell order for {qty_of_one_stock} shares of {symbol} at {stop_loss_price}")
