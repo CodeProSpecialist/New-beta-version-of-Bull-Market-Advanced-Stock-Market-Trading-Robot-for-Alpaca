@@ -17,7 +17,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 
-# import warnings     # comment out this line to utilize warnings.filterwarnings
+# import warnings
 
 # warnings.filterwarnings('ignore')     # comment out this line to display more error messages.
 
